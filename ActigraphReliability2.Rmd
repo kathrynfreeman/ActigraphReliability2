@@ -1,0 +1,95 @@
+---
+title: "Actigraph Reliability Comparison with GGIR"
+author: "Kathryn Freeman"
+date: '`r Sys.Date()`'
+output:
+  html_notebook:
+    toc: yes
+    toc_float: true
+    number_sections: no
+    theme: cerulean
+    code_folding: hide
+---
+
+## Coefficient of Agreement: Intraclass correlation Coefficient
+
+* Interpreting ICC
+  + Values less than 0.5 = poor reliability 
+  + Values between 0.5 and 0.75 = moderate reliability
+  + Values between 0.75 and 0.9 = good reliability
+  + Values greater than 0.9 = excellent reliability
+
+A Guideline of Selecting and Reporting Intraclass Correlation Coefficients for Reliability Research, Koo 2016 
+
+* ICC type
+  + ICC(1) Each subject is assessed by a different set of randomly selected raters, and the
+  reliability is calculated from a single measurement. Uncommonly used in clinical
+  reliability studies.
+  + ICC(1,k) As above, but reliability is calculated by taking an average of the k raters’
+  measurements.
+  + ICC(2) Each subject is measured by each rater, and raters are considered representative
+  of a larger population of similar raters. Reliability calculated from a single
+  measurement.
+  + ICC(2,k) As above, but reliability is calculated by taking an average of the k raters’
+  measurements.
+  + ICC(3) Each subject is assessed by each rater, but the raters are the only raters of
+  interest. Reliability calculated from a single measurement.
+  + ICC(3,k) As above, but reliability is calculated by taking an average of the k raters’
+  measurements.
+    + Please note that subjects in this case are nights of sleep and raters are the two actigraphs
+  
+Model ICC(2) appears most applicable to the sleep data set
+
+## Set-up {.tabset}
+
+### Load packages
+```{r}
+library(here)
+library(readr)
+library(lubridate)
+library(tidyverse) # ggplot, dplyr, tidyr, readr, purr, tibble
+library(ICC) # ICC and CI
+```
+
+### Load data
+```{r}
+#Import data
+df <- read_csv(here("data", "compiledsleepdata.csv"))
+
+#View data
+df
+
+```
+
+
+## GENEActiv Markdown data {.tabset}
+
+### Time in Bed
+```{r}
+tinb <- pivot_wider(df %>% filter(analysis == "markdown") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = tinb) 
+
+irrICC::icc1a.fn(tinb)
+irrICC::ci.ICC1a(tinb)
+irrICC::pvals.ICC1a(tinb)
+
+ggplot
+```
+
+
+
+```{r}
+dur.df <- data %>% select(wearer, dur, actigraph, analysis) %>% 
+  filter(actigraph == "g1" | actigraph == "g2") %>% 
+  filter(analysis == "markdown") %>% 
+  group_by(actigraph, wearer, analysis) 
+
+irr::icc(dur.df, model = c("twoway"), type = c("agreement"), unit = c("single"))
+
+dur.df
+
+%>% group_by(actigraph, wearer, analysis) %>% select(dur)
+group_by(actigraph) %>% group_split(dur, .keep = TRUE)
+```
+

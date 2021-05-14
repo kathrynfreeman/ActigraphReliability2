@@ -44,7 +44,7 @@ df
 
 ### Create Function
 ```{r}
-ga2_md <- function(p){
+ga2_md <- function(p, m, n, o){
   
   icc_calc <- irrICC::icc1a.fn(p) 
   icc_calc_ci <- irrICC::ci.ICC1a(p) 
@@ -69,9 +69,9 @@ print(classify_icc)
 
 plot <- ggplot((p), aes(x=g1, y=g2)) + geom_point() +
 geom_smooth(method=lm, se=FALSE) +
-labs(title = "Time Spent in Bed", subtitle = "Two GENEActivs using Markdown") +
-labs(x = "GENEActiv 1 (mins)") +
-labs(y = "GENEActiv 2 (mins)")
+labs(title = m, subtitle = "Two GENEActivs using Markdown") +
+labs(x = n) +
+labs(y = o)
 
 
 print(plot)
@@ -86,55 +86,71 @@ print(plot)
 ## GENEActiv Markdown data {.tabset}
 
 ### Time in Bed (tinb)
+#### Time in Bed (tinb)
+##### tinb = total duration of time spent in bed
 ```{r}
 tinb_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (tinb)))
 
-ga2_md(tinb_ga2_md)
+ga2_md(tinb_ga2_md, "Time Spent in Bed", "GENEActiv 1 (mins)", "GENEActiv 2 (mins)")
 ```
 ### Percent Sleep (pslp)
+#### Percent Sleep (pslp)
+##### pslp = (Sleep Minutes / Duration in Bed) x 100
 ```{r}
 pslp_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (pslp)))
 
-ga2_md(pslp_ga2_md)
+ga2_md(pslp_ga2_md, "Percent Sleep", "GENEActiv 1 (percent)", "GENEActiv 2 (percent)")
 ```
 ### Sleep Minutes (smin)
+#### Sleep Minutes (smin)
+##### smin = minutes asleep in bed
 ```{r}
 smin_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (smin)))
 
-ga2_md(smin_ga2_md)
+ga2_md(smin_ga2_md, "Sleep Minutes", "GENEActiv 1 (mins)", "GENEActiv 2 (mins)")
 ```
 ### Wake Minutes (wmin)
+#### Wake Minutes (wmin)
+##### wmin = minutes awake in bed
 ```{r}
 wmin_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (wmin)))
 
-ga2_md(wmin_ga2_md)
+ga2_md(wmin_ga2_md, "Wake Minutes", "GENEActiv 1 (mins)", "GENEActiv 2 (mins)")
 ```
 ### Wake-up Time (etime)
+#### Wake-up Time (etime)
+##### etime = time awakened from sleep in morning
+###### Adjusted to 2pm = 0:00 in minutes since 2pm
 ```{r}
 etime_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (etime)))
 
-ga2_md(etime_ga2_md)
+ga2_md(etime_ga2_md, "Wake-up Time", "GENEActiv 1 (mins after 2pm)","GENEActiv 2 (mins after 2pm)")
 ```
 ### Sleep Time (stime)
+#### Sleep Time (stime)
+##### stime = time fell asleep at night
+###### Adjusted to 2pm = 0:00 in mins since 2pm
 ```{r}
 
 stime_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (stime)))
 
-ga2_md(stime_ga2_md)
+ga2_md(stime_ga2_md, "Sleep Time", "GENEActiv 1 (mins after 2pm)","GENEActiv 2 (mins after 2pm)")
 ```
 ### Total Sleep Duration (dur)
+#### Total Sleep Duration (dur)
+##### dur = time between fall asleep time and wake-up time
 ```{r}
 dur_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
@@ -144,17 +160,48 @@ ga2_md(dur_ga2_md)
 ```
 
 ### Sleep Midpoint (mid)
+#### mid = middle of sleep period
 
 
 
 
+## GENEActiv GGIR data {.tabset}
 
 ### Time in Bed (tinb)
+#### Time in Bed (tinb)
+##### tinb = total duration of time spent in bed
+
+
 ### Percent Sleep (pslp)
+#### Percent Sleep (pslp)
+##### pslp = (Sleep Minutes / Duration in Bed) x 100
+
+
 ### Sleep Minutes (smin)
+#### Sleep Minutes (smin)
+##### smin = minutes asleep in bed
+
+
 ### Wake Minutes (wmin)
+#### Wake Minutes (wmin)
+##### wmin = minutes awake in bed
+
+
 ### Wake-up Time (etime)
+#### Wake-up Time (etime)
+##### etime = time awakened from sleep in morning
+###### Adjusted to 2pm = 0:00 in minutes since 2pm
+
 ### Sleep Time (stime)
+#### Sleep Time (stime)
+##### stime = time fell asleep at night
+###### Adjusted to 2pm = 0:00 in mins since 2pm
+
 ### Total Sleep Duration (dur)
+#### Total Sleep Duration (dur)
+##### dur = time between fall asleep time and wake-up time
+
 ### Sleep Midpoint (mid)
+#### Sleep Midpoint (mid)
+##### mid = middle of sleep period
 

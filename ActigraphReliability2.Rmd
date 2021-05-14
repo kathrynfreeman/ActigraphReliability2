@@ -13,32 +13,13 @@ output:
 
 ## Coefficient of Agreement: Intraclass correlation Coefficient
 
-* Interpreting ICC
+* Interpreting ICC according to Koo and Li (2016)
   + Values less than 0.5 = poor reliability 
   + Values between 0.5 and 0.75 = moderate reliability
   + Values between 0.75 and 0.9 = good reliability
   + Values greater than 0.9 = excellent reliability
 
-A Guideline of Selecting and Reporting Intraclass Correlation Coefficients for Reliability Research, Koo 2016 
 
-* ICC type
-  + ICC(1) Each subject is assessed by a different set of randomly selected raters, and the
-  reliability is calculated from a single measurement. Uncommonly used in clinical
-  reliability studies.
-  + ICC(1,k) As above, but reliability is calculated by taking an average of the k raters’
-  measurements.
-  + ICC(2) Each subject is measured by each rater, and raters are considered representative
-  of a larger population of similar raters. Reliability calculated from a single
-  measurement.
-  + ICC(2,k) As above, but reliability is calculated by taking an average of the k raters’
-  measurements.
-  + ICC(3) Each subject is assessed by each rater, but the raters are the only raters of
-  interest. Reliability calculated from a single measurement.
-  + ICC(3,k) As above, but reliability is calculated by taking an average of the k raters’
-  measurements.
-    + Please note that subjects in this case are nights of sleep and raters are the two actigraphs
-  
-Model ICC(2) appears most applicable to the sleep data set
 
 ## Set-up {.tabset}
 
@@ -59,40 +40,32 @@ df <- read_csv(here("data", "compiledsleepdata.csv"))
 #View data
 df
 
-
 ```
 
-
-## GENEActiv Markdown data {.tabset}
-
-### Time in Bed
+### Create Function
 ```{r}
-tinb_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
-  filter(actigraph == "g1" | actigraph == "g2"), night, 
-  names_from = actigraph, values_from = (tinb)))
-
 ga2_md <- function(p){
   
   icc_calc <- irrICC::icc1a.fn(p) 
   icc_calc_ci <- irrICC::ci.ICC1a(p) 
   icc_calc_pval <- irrICC::pvals.ICC1a(p)
 
-  "ICC" <- (icc_calc$icc1a)
+  "ICC" <- (icc_calc$icc1a) 
   
 classify_icc <- 
-    c("ICC" = (icc_calc$icc1a),
-    "2.5% CI" = (icc_calc_ci$lcb),
-    "97.5% CI" = (icc_calc_ci$ucb),
-    "p-value" = (icc_calc_pval$pval),
-    "Night Number" = (icc_calc$n),
-    "Rater Number" = (icc_calc$r),
-    "Classification" = case_when(
-    "ICC" > 0.74 ~ "Excellent",
-    "ICC" <= 0.74 & ICC > 0.59 ~ "Good",
-    "ICC" <= 0.59 & ICC > 0.40 ~ "Fair",
-    "ICC" < 0.40  ~ "Poor"))
- 
-  print(classify_icc)
+    c("ICC" = (icc_calc$icc1a) %>% round(digits = 4),
+    "2.5% CI" = (icc_calc_ci$lcb) %>% round(digits = 4),
+    "97.5% CI" = (icc_calc_ci$ucb) %>% round(digits = 4),
+    "p-value" = (icc_calc_pval$pval) %>% round(digits = 4),
+    "Nights" = (icc_calc$n) %>% round(digits = 1),
+    "Raters" = (icc_calc$r) %>% round(digits = 1),
+    "Class" = case_when(
+    icc_calc$icc1a > 0.90 ~ "Excellent",
+    icc_calc$icc1a <= 0.75 & icc_calc$icc1a > 0.9 ~ "Good",
+    icc_calc$icc1a <= 0.5 & icc_calc$icc1a > 0.75 ~ "Moderate",
+    icc_calc$icc1a < 0.5  ~ "Poor"))
+    
+print(classify_icc) 
 
 plot <- ggplot((p), aes(x=g1, y=g2)) + geom_point() +
 geom_smooth(method=lm, se=FALSE) +
@@ -105,44 +78,83 @@ print(plot)
 }
 ```
 
+### Adjust time to mins since 2pm
 ```{r}
+
+```
+
+## GENEActiv Markdown data {.tabset}
+
+### Time in Bed (tinb)
+```{r}
+tinb_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (tinb)))
+
 ga2_md(tinb_ga2_md)
 ```
+### Percent Sleep (pslp)
 ```{r}
-icc_calc <- irrICC::icc1a.fn(tinb_ga2_md) 
-  icc_calc_ci <- irrICC::ci.ICC1a(tinb_ga2_md) 
-  icc_calc_pval <- irrICC::pvals.ICC1a(tinb_ga2_md)
+pslp_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (pslp)))
 
-  "ICC" <- (icc_calc$icc1a)
-  
-classify_icc <- 
-    c("p-value" = (icc_calc_pval$pval),
-    "ICC" = (icc_calc$icc1a),
-    "2.5% CI" = (icc_calc_ci$lcb),
-    "97.5% CI" = (icc_calc_ci$ucb),
-    "Night Number" = (icc_calc$n),
-    "Rater Number" = (icc_calc$r),
-    "Classification" = case_when(
-    "ICC" > 0.74 ~ "Excellent",
-    "ICC" <= 0.74 & ICC > 0.59 ~ "Good",
-    "ICC" <= 0.59 & ICC > 0.40 ~ "Fair",
-    "ICC" < 0.40  ~ "Poor"))
+ga2_md(pslp_ga2_md)
+```
+### Sleep Minutes (smin)
+```{r}
+smin_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (smin)))
 
-print(classify_icc)
+ga2_md(smin_ga2_md)
+```
+### Wake Minutes (wmin)
+```{r}
+wmin_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (wmin)))
+
+ga2_md(wmin_ga2_md)
+```
+### Wake-up Time (etime)
+```{r}
+etime_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (etime)))
+
+ga2_md(etime_ga2_md)
+```
+### Sleep Time (stime)
+```{r}
+
+stime_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (stime)))
+
+ga2_md(stime_ga2_md)
+```
+### Total Sleep Duration (dur)
+```{r}
+dur_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (etime-stime)))
+
+ga2_md(dur_ga2_md)
 ```
 
+### Sleep Midpoint (mid)
 
-```{r}
-dur.df <- data %>% select(wearer, dur, actigraph, analysis) %>% 
-  filter(actigraph == "g1" | actigraph == "g2") %>% 
-  filter(analysis == "markdown") %>% 
-  group_by(actigraph, wearer, analysis) 
 
-irr::icc(dur.df, model = c("twoway"), type = c("agreement"), unit = c("single"))
 
-dur.df
 
-%>% group_by(actigraph, wearer, analysis) %>% select(dur)
-group_by(actigraph) %>% group_split(dur, .keep = TRUE)
-```
+
+### Time in Bed (tinb)
+### Percent Sleep (pslp)
+### Sleep Minutes (smin)
+### Wake Minutes (wmin)
+### Wake-up Time (etime)
+### Sleep Time (stime)
+### Total Sleep Duration (dur)
+### Sleep Midpoint (mid)
 

@@ -61,8 +61,8 @@ classify_icc <-
     "Raters" = (icc_calc$r) %>% round(digits = 1),
     "Class" = case_when(
     icc_calc$icc1a > 0.90 ~ "Excellent",
-    icc_calc$icc1a <= 0.75 & icc_calc$icc1a > 0.9 ~ "Good",
-    icc_calc$icc1a <= 0.5 & icc_calc$icc1a > 0.75 ~ "Moderate",
+    icc_calc$icc1a <= 0.9 & icc_calc$icc1a > 0.75 ~ "Good",
+    icc_calc$icc1a <= 0.75 & icc_calc$icc1a > 0.5 ~ "Moderate",
     icc_calc$icc1a < 0.5  ~ "Poor"))
     
 print(classify_icc) 

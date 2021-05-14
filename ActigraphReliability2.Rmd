@@ -59,6 +59,7 @@ df <- read_csv(here("data", "compiledsleepdata.csv"))
 #View data
 df
 
+
 ```
 
 
@@ -66,17 +67,69 @@ df
 
 ### Time in Bed
 ```{r}
-tinb <- pivot_wider(df %>% filter(analysis == "markdown") %>% 
+tinb_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
-  names_from = actigraph, values_from = tinb) 
+  names_from = actigraph, values_from = (tinb)))
 
-irrICC::icc1a.fn(tinb)
-irrICC::ci.ICC1a(tinb)
-irrICC::pvals.ICC1a(tinb)
+ga2_md <- function(p){
+  
+  icc_calc <- irrICC::icc1a.fn(p) 
+  icc_calc_ci <- irrICC::ci.ICC1a(p) 
+  icc_calc_pval <- irrICC::pvals.ICC1a(p)
 
-ggplot
+  "ICC" <- (icc_calc$icc1a)
+  
+classify_icc <- 
+    c("ICC" = (icc_calc$icc1a),
+    "2.5% CI" = (icc_calc_ci$lcb),
+    "97.5% CI" = (icc_calc_ci$ucb),
+    "p-value" = (icc_calc_pval$pval),
+    "Night Number" = (icc_calc$n),
+    "Rater Number" = (icc_calc$r),
+    "Classification" = case_when(
+    "ICC" > 0.74 ~ "Excellent",
+    "ICC" <= 0.74 & ICC > 0.59 ~ "Good",
+    "ICC" <= 0.59 & ICC > 0.40 ~ "Fair",
+    "ICC" < 0.40  ~ "Poor"))
+ 
+  print(classify_icc)
+
+plot <- ggplot((p), aes(x=g1, y=g2)) + geom_point() +
+geom_smooth(method=lm, se=FALSE) +
+labs(title = "Time Spent in Bed", subtitle = "Two GENEActivs using Markdown") +
+labs(x = "GENEActiv 1 (mins)") +
+labs(y = "GENEActiv 2 (mins)")
+
+
+print(plot)
+}
 ```
 
+```{r}
+ga2_md(tinb_ga2_md)
+```
+```{r}
+icc_calc <- irrICC::icc1a.fn(tinb_ga2_md) 
+  icc_calc_ci <- irrICC::ci.ICC1a(tinb_ga2_md) 
+  icc_calc_pval <- irrICC::pvals.ICC1a(tinb_ga2_md)
+
+  "ICC" <- (icc_calc$icc1a)
+  
+classify_icc <- 
+    c("p-value" = (icc_calc_pval$pval),
+    "ICC" = (icc_calc$icc1a),
+    "2.5% CI" = (icc_calc_ci$lcb),
+    "97.5% CI" = (icc_calc_ci$ucb),
+    "Night Number" = (icc_calc$n),
+    "Rater Number" = (icc_calc$r),
+    "Classification" = case_when(
+    "ICC" > 0.74 ~ "Excellent",
+    "ICC" <= 0.74 & ICC > 0.59 ~ "Good",
+    "ICC" <= 0.59 & ICC > 0.40 ~ "Fair",
+    "ICC" < 0.40  ~ "Poor"))
+
+print(classify_icc)
+```
 
 
 ```{r}

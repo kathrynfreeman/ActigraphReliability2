@@ -42,7 +42,7 @@ df
 
 ```
 
-### Create Function
+### ICC Function
 ```{r}
 ga2_md <- function(p, m, n, o){
   
@@ -78,9 +78,20 @@ print(plot)
 }
 ```
 
-### Adjust time to mins since 2pm
+### Time Functions
 ```{r}
+adjtime <- function(x) {df %>%
+  mutate(rawtime = (((hour(hms(x)*60) + (minute(hms(x)) + (600)))))) %>%
+  mutate(adjtime = (ifelse(rawtime>1439, rawtime-1440, rawtime)))
+}
 
+sleepduration <- function (y) {df %>%
+  mutate(dur = (adjtime(df$etime)$adjtime - (adjtime(df$stime)$adjtime)))
+}
+
+sleepmid <- function (w) {df %>%
+  mutate(mid = ((adjtime(df$etime)$adjtime + (adjtime(df$stime)$adjtime))/2))
+}
 ```
 
 ## GENEActiv Markdown data {.tabset}
@@ -130,9 +141,9 @@ ga2_md(wmin_ga2_md, "Wake Minutes", "GENEActiv 1 (mins)", "GENEActiv 2 (mins)")
 ##### etime = time awakened from sleep in morning
 ###### Adjusted to 2pm = 0:00 in minutes since 2pm
 ```{r}
-etime_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
+etime_ga2_md <-  (pivot_wider(adjtime(df$etime) %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
-  names_from = actigraph, values_from = (etime)))
+  names_from = actigraph, values_from = (adjtime)))
 
 ga2_md(etime_ga2_md, "Wake-up Time", "GENEActiv 1 (mins after 2pm)","GENEActiv 2 (mins after 2pm)")
 ```
@@ -142,9 +153,9 @@ ga2_md(etime_ga2_md, "Wake-up Time", "GENEActiv 1 (mins after 2pm)","GENEActiv 2
 ###### Adjusted to 2pm = 0:00 in mins since 2pm
 ```{r}
 
-stime_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
+stime_ga2_md <- (pivot_wider(adjtime(df$stime) %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
-  names_from = actigraph, values_from = (stime)))
+  names_from = actigraph, values_from = (adjtime)))
 
 ga2_md(stime_ga2_md, "Sleep Time", "GENEActiv 1 (mins after 2pm)","GENEActiv 2 (mins after 2pm)")
 ```
@@ -152,16 +163,23 @@ ga2_md(stime_ga2_md, "Sleep Time", "GENEActiv 1 (mins after 2pm)","GENEActiv 2 (
 #### Total Sleep Duration (dur)
 ##### dur = time between fall asleep time and wake-up time
 ```{r}
-dur_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>% 
+dur_ga2_md <- (pivot_wider(sleepduration(1) %>% filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
-  names_from = actigraph, values_from = (etime-stime)))
+  names_from = actigraph, values_from = dur))
 
-ga2_md(dur_ga2_md)
+ga2_md(dur_ga2_md, "Sleep Duration", "GENEActiv 1 (mins)","GENEActiv 2 (mins")
 ```
 
 ### Sleep Midpoint (mid)
-#### mid = middle of sleep period
+#### Sleep Midpoint (mid)
+##### mid = middle of sleep period
+```{r}
+mid_ga2_md <- (pivot_wider(sleepmid(1) %>% filter(analysis == "markdown") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = mid))
 
+ga2_md(mid_ga2_md, "Sleep Midpoint", "GENEActiv 1 (mins after 2pm)","GENEActiv 2 (mins after 2pm)")
+```
 
 
 

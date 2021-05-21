@@ -220,7 +220,7 @@ sleepmid <- function (w) {df %>%
 }
 ```
 
-## GENEActiv Markdown data {.tabset}
+## Two GENEActivs using Markdown data {.tabset}
 
 ### Time in Bed (tinb)
 #### Time in Bed (tinb)
@@ -327,7 +327,7 @@ ga2_md(mid_ga2_md, "Sleep Midpoint", "GENEActiv 1 (mins after 2pm)",
 
 
 
-## GENEActiv GGIR data {.tabset}
+## Two GENEActivs using GGIR data {.tabset}
 
 ### Time in Bed (tinb)
 #### Time in Bed (tinb)
@@ -431,7 +431,7 @@ ga2_md(mid_ga2_ggir, "Sleep Midpoint", "GENEActiv 1 (mins after 2pm)",
 
 
 
-## GENEActiv Markdown vs GENEActiv data {.tabset}
+## GENEActiv Markdown vs GENEActiv GGIR data {.tabset}
 
 ### Time in Bed (tinb)
 #### Time in Bed (tinb)
@@ -602,63 +602,108 @@ ga_md_ggir(mid_ga2_md_ggir2, "Sleep Midpoint",
 
 
 
-## GENEActiv GGIR data vs Diary {.tabset}
+## GENEActiv GGIR data vs Diary + GENEActiv Markdown data vs Diary {.tabset}
 
 ### Time in Bed (tinb)
 #### Time in Bed (tinb)
 ##### tinb = total duration of time spent in bed
 ```{r}
 tinb_ga2_ggir_d <- (pivot_wider(df %>% 
+  filter(test == "same") %>%
   filter(analysis == "ggir" | analysis == "diary") %>% 
   filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
   names_from = actigraph, values_from = (tinb)))
 
 diary(tinb_ga2_ggir_d)
+
+tinb_ga2_md_d <- (pivot_wider(df %>% 
+  filter(test == "same") %>%                              
+  filter(analysis == "markdown" | analysis == "diary") %>% 
+  filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
+  names_from = actigraph, values_from = (tinb)))
+
+diary(tinb_ga2_md_d)
 ```
 ### Percent Sleep (pslp)
 #### Percent Sleep (pslp)
 ##### pslp = (Sleep Minutes / Duration in Bed) x 100
 ```{r}
-pslp_ga2_ggir_d <- (pivot_wider(df %>% 
+pslp_ga2_ggir_d <- (pivot_wider(df %>%
+  filter(test == "same") %>%                                
   filter(analysis == "ggir" | analysis == "diary") %>% 
   filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
   names_from = actigraph, values_from = (pslp)))
 
 diary(pslp_ga2_ggir_d)
+
+pslp_ga2_md_d <- (pivot_wider(df %>% 
+  filter(test == "same") %>%                              
+  filter(analysis == "markdown" | analysis == "diary") %>% 
+  filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
+  names_from = actigraph, values_from = (pslp)))
+
+diary(pslp_ga2_md_d)
 ```
 ### Sleep Minutes (smin)
 #### Sleep Minutes (smin)
 ##### smin = minutes asleep in bed
 ```{r}
 smin_ga2_ggir_d <- (pivot_wider(df %>% 
+  filter(test == "same") %>%                                
   filter(analysis == "ggir" | analysis == "diary") %>% 
   filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
   names_from = actigraph, values_from = (smin)))
 
 diary(smin_ga2_ggir_d)
+
+smin_ga2_md_d <- (pivot_wider(df %>% 
+  filter(test == "same") %>%                              
+  filter(analysis == "markdown" | analysis == "diary") %>% 
+  filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
+  names_from = actigraph, values_from = (smin)))
+
+diary(smin_ga2_md_d)
 ```
 ### Wake Minutes (wmin)
 #### Wake Minutes (wmin)
 ##### wmin = minutes awake in bed
 ```{r}
-wmin_ga2_ggir_d <- (pivot_wider(df %>% 
+wmin_ga2_ggir_d <- (pivot_wider(df %>%
+  filter(test == "same") %>%                                
   filter(analysis == "ggir" | analysis == "diary") %>% 
   filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
   names_from = actigraph, values_from = (wmin)))
 
 diary(wmin_ga2_ggir_d)
+
+wmin_ga2_md_d <- (pivot_wider(df %>% 
+  filter(test == "same") %>%                              
+  filter(analysis == "markdown" | analysis == "diary") %>% 
+  filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
+  names_from = actigraph, values_from = (wmin)))
+
+diary(wmin_ga2_md_d)
 ```
 ### Wake-up Time (etime)
 #### Wake-up Time (etime)
 ##### etime = time awakened from sleep in morning
 ###### Adjusted to 2pm = 0:00 in minutes since 2pm
 ```{r}
-etime_ga2_ggir_d <-  (pivot_wider(adjtime(df$etime) %>% 
+etime_ga2_ggir_d <-  (pivot_wider(adjtime(df$etime) %>%
+  filter(test == "same") %>%                                  
   filter(analysis == "ggir" | analysis == "diary") %>% 
   filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
   names_from = actigraph, values_from = (adjtime)))
 
 diary(etime_ga2_ggir_d)
+
+etime_ga2_md_d <-  (pivot_wider(adjtime(df$etime) %>%
+  filter(test == "same") %>%                                
+  filter(analysis == "markdown" | analysis == "diary") %>% 
+  filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
+  names_from = actigraph, values_from = (adjtime)))
+
+diary(etime_ga2_md_d)
 ```
 ### Sleep Time (stime)
 #### Sleep Time (stime)
@@ -667,22 +712,40 @@ diary(etime_ga2_ggir_d)
 ```{r}
 
 stime_ga2_ggir_d <- (pivot_wider(adjtime(df$stime) %>% 
+  filter(test == "same") %>%                                 
   filter(analysis == "ggir" | analysis == "diary") %>% 
   filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
   names_from = actigraph, values_from = (adjtime)))
 
 diary(stime_ga2_ggir_d)
+
+stime_ga2_md_d <- (pivot_wider(adjtime(df$stime) %>% 
+  filter(test == "same") %>%                               
+  filter(analysis == "markdown" | analysis == "diary") %>% 
+  filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
+  names_from = actigraph, values_from = (adjtime)))
+
+diary(stime_ga2_md_d)
 ```
 ### Total Sleep Duration (dur)
 #### Total Sleep Duration (dur)
 ##### dur = time between fall asleep time and wake-up time
 ```{r}
-dur_ga2_ggir_d <- (pivot_wider(sleepduration(1) %>% 
+dur_ga2_ggir_d <- (pivot_wider(sleepduration(1) %>%
+  filter(test == "same") %>%                               
   filter(analysis == "ggir" | analysis == "diary") %>% 
   filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
   names_from = actigraph, values_from = dur))
 
 diary(dur_ga2_ggir_d)
+
+dur_ga2_md_d <- (pivot_wider(sleepduration(1) %>%
+  filter(test == "same") %>%                             
+  filter(analysis == "markdown" | analysis == "diary") %>% 
+  filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
+  names_from = actigraph, values_from = dur))
+
+diary(dur_ga2_md_d)
 ```
 
 ### Sleep Midpoint (mid)
@@ -690,11 +753,20 @@ diary(dur_ga2_ggir_d)
 ##### mid = middle of sleep period
 ```{r}
 mid_ga2_ggir_d <- (pivot_wider(sleepmid(1) %>% 
+  filter(test == "same") %>%                               
   filter(analysis == "ggir" | analysis == "diary") %>% 
   filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
   names_from = actigraph, values_from = mid))
 
 diary(mid_ga2_ggir_d)
+
+mid_ga2_md_d <- (pivot_wider(sleepmid(1) %>%
+  filter(test == "same") %>%                             
+  filter(analysis == "markdown" | analysis == "diary") %>% 
+  filter(actigraph == "g1" | actigraph == "g2" | actigraph == "d"), night, 
+  names_from = actigraph, values_from = mid))
+
+diary(mid_ga2_md_d)
 ```
 
 

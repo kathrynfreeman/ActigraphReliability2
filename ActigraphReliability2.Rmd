@@ -44,7 +44,7 @@ df
 
 ### ICC Function
 ```{r}
-ga2_md <- function(p, m, n, o){
+ga2_md <- function(p, m, n, o, t, f, e){
   
   icc_calc <- irrICC::icc1a.fn(p) 
   icc_calc_ci <- irrICC::ci.ICC1a(p) 
@@ -67,15 +67,50 @@ classify_icc <-
     
 print(classify_icc) 
 
-plot <- ggplot((p), aes(x=g1, y=g2)) + geom_point() +
+plot <- ggplot((p), aes(g1, g2)) + geom_point() +
 geom_smooth(method=lm, se=FALSE) +
-labs(title = m, subtitle = "Two GENEActivs using Markdown") +
+labs(title = m, subtitle = t) +
 labs(x = n) +
 labs(y = o)
 
 
 print(plot)
 }
+
+
+ga_md_ggir <- function(p, m, n, o, t, f, e){
+  
+  icc_calc <- irrICC::icc1a.fn(p) 
+  icc_calc_ci <- irrICC::ci.ICC1a(p) 
+  icc_calc_pval <- irrICC::pvals.ICC1a(p)
+
+  "ICC" <- (icc_calc$icc1a) 
+  
+classify_icc <- 
+    c("ICC" = (icc_calc$icc1a) %>% round(digits = 4),
+    "2.5% CI" = (icc_calc_ci$lcb) %>% round(digits = 4),
+    "97.5% CI" = (icc_calc_ci$ucb) %>% round(digits = 4),
+    "p-value" = (icc_calc_pval$pval) %>% round(digits = 4),
+    "Nights" = (icc_calc$n) %>% round(digits = 1),
+    "Raters" = (icc_calc$r) %>% round(digits = 1),
+    "Class" = case_when(
+    icc_calc$icc1a > 0.90 ~ "Excellent",
+    icc_calc$icc1a <= 0.9 & icc_calc$icc1a > 0.75 ~ "Good",
+    icc_calc$icc1a <= 0.75 & icc_calc$icc1a > 0.5 ~ "Moderate",
+    icc_calc$icc1a < 0.5  ~ "Poor"))
+    
+print(classify_icc) 
+
+plot <- ggplot((p), aes(ggir, markdown)) + geom_point() +
+geom_smooth(method=lm, se=FALSE) +
+labs(title = m, subtitle = t) +
+labs(x = n) +
+labs(y = o)
+
+
+print(plot)
+}
+
 ```
 
 ### Time Functions
@@ -104,7 +139,8 @@ tinb_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>%
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (tinb)))
 
-ga2_md(tinb_ga2_md, "Time Spent in Bed", "GENEActiv 1 (mins)", "GENEActiv 2 (mins)")
+ga2_md(tinb_ga2_md, "Time Spent in Bed", "GENEActiv 1 (mins)", 
+       "GENEActiv 2 (mins)", "Two GENEActivs using Markdown")
 ```
 ### Percent Sleep (pslp)
 #### Percent Sleep (pslp)
@@ -114,7 +150,8 @@ pslp_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>%
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (pslp)))
 
-ga2_md(pslp_ga2_md, "Percent Sleep", "GENEActiv 1 (percent)", "GENEActiv 2 (percent)")
+ga2_md(pslp_ga2_md, "Percent Sleep", "GENEActiv 1 (percent)", 
+       "GENEActiv 2 (percent)", "Two GENEActivs using Markdown")
 ```
 ### Sleep Minutes (smin)
 #### Sleep Minutes (smin)
@@ -124,7 +161,8 @@ smin_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>%
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (smin)))
 
-ga2_md(smin_ga2_md, "Sleep Minutes", "GENEActiv 1 (mins)", "GENEActiv 2 (mins)")
+ga2_md(smin_ga2_md, "Sleep Minutes", "GENEActiv 1 (mins)", 
+       "GENEActiv 2 (mins)", "Two GENEActivs using Markdown")
 ```
 ### Wake Minutes (wmin)
 #### Wake Minutes (wmin)
@@ -134,40 +172,48 @@ wmin_ga2_md <- (pivot_wider(df %>% filter(analysis == "markdown") %>%
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (wmin)))
 
-ga2_md(wmin_ga2_md, "Wake Minutes", "GENEActiv 1 (mins)", "GENEActiv 2 (mins)")
+ga2_md(wmin_ga2_md, "Wake Minutes", "GENEActiv 1 (mins)", 
+       "GENEActiv 2 (mins)", "Two GENEActivs using Markdown")
 ```
 ### Wake-up Time (etime)
 #### Wake-up Time (etime)
 ##### etime = time awakened from sleep in morning
 ###### Adjusted to 2pm = 0:00 in minutes since 2pm
 ```{r}
-etime_ga2_md <-  (pivot_wider(adjtime(df$etime) %>% filter(analysis == "markdown") %>% 
+etime_ga2_md <-  (pivot_wider(adjtime(df$etime) %>% 
+  filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (adjtime)))
 
-ga2_md(etime_ga2_md, "Wake-up Time", "GENEActiv 1 (mins after 2pm)","GENEActiv 2 (mins after 2pm)")
+ga2_md(etime_ga2_md, "Wake-up Time", "GENEActiv 1 (mins after 2pm)",
+       "GENEActiv 2 (mins after 2pm)", "Two GENEActivs using Markdown")
 ```
+
 ### Sleep Time (stime)
 #### Sleep Time (stime)
 ##### stime = time fell asleep at night
 ###### Adjusted to 2pm = 0:00 in mins since 2pm
 ```{r}
 
-stime_ga2_md <- (pivot_wider(adjtime(df$stime) %>% filter(analysis == "markdown") %>% 
+stime_ga2_md <- (pivot_wider(adjtime(df$stime) %>% 
+  filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = (adjtime)))
 
-ga2_md(stime_ga2_md, "Sleep Time", "GENEActiv 1 (mins after 2pm)","GENEActiv 2 (mins after 2pm)")
+ga2_md(stime_ga2_md, "Sleep Time", "GENEActiv 1 (mins after 2pm)",
+       "GENEActiv 2 (mins after 2pm)", "Two GENEActivs using Markdown")
 ```
 ### Total Sleep Duration (dur)
 #### Total Sleep Duration (dur)
 ##### dur = time between fall asleep time and wake-up time
 ```{r}
-dur_ga2_md <- (pivot_wider(sleepduration(1) %>% filter(analysis == "markdown") %>% 
+dur_ga2_md <- (pivot_wider(sleepduration(1) %>% 
+  filter(analysis == "markdown") %>% 
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = dur))
 
-ga2_md(dur_ga2_md, "Sleep Duration", "GENEActiv 1 (mins)","GENEActiv 2 (mins")
+ga2_md(dur_ga2_md, "Sleep Duration", "GENEActiv 1 (mins)", 
+       "GENEActiv 2 (mins)", "Two GENEActivs using Markdown")
 ```
 
 ### Sleep Midpoint (mid)
@@ -178,8 +224,15 @@ mid_ga2_md <- (pivot_wider(sleepmid(1) %>% filter(analysis == "markdown") %>%
   filter(actigraph == "g1" | actigraph == "g2"), night, 
   names_from = actigraph, values_from = mid))
 
-ga2_md(mid_ga2_md, "Sleep Midpoint", "GENEActiv 1 (mins after 2pm)","GENEActiv 2 (mins after 2pm)")
+ga2_md(mid_ga2_md, "Sleep Midpoint", "GENEActiv 1 (mins after 2pm)",
+       "GENEActiv 2 (mins after 2pm)", "Two GENEActivs using Markdown")
 ```
+
+
+
+
+
+
 
 
 
@@ -188,38 +241,268 @@ ga2_md(mid_ga2_md, "Sleep Midpoint", "GENEActiv 1 (mins after 2pm)","GENEActiv 2
 ### Time in Bed (tinb)
 #### Time in Bed (tinb)
 ##### tinb = total duration of time spent in bed
+```{r}
+tinb_ga2_ggir <- (pivot_wider(df %>% filter(analysis == "ggir") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (tinb)))
 
-
+ga2_md(tinb_ga2_ggir, "Time Spent in Bed", "GENEActiv 1 (mins)", 
+       "GENEActiv 2 (mins)", "Two GENEActivs using GGIR")
+```
 ### Percent Sleep (pslp)
 #### Percent Sleep (pslp)
 ##### pslp = (Sleep Minutes / Duration in Bed) x 100
+```{r}
+pslp_ga2_ggir <- (pivot_wider(df %>% filter(analysis == "ggir") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (pslp)))
 
-
+ga2_md(pslp_ga2_ggir, "Percent Sleep", "GENEActiv 1 (percent)", 
+       "GENEActiv 2 (percent)", "Two GENEActivs using GGIR")
+```
 ### Sleep Minutes (smin)
 #### Sleep Minutes (smin)
 ##### smin = minutes asleep in bed
+```{r}
+smin_ga2_ggir <- (pivot_wider(df %>% filter(analysis == "ggir") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (smin)))
 
-
+ga2_md(smin_ga2_ggir, "Sleep Minutes", "GENEActiv 1 (mins)", 
+       "GENEActiv 2 (mins)", "Two GENEActivs using GGIR")
+```
 ### Wake Minutes (wmin)
 #### Wake Minutes (wmin)
 ##### wmin = minutes awake in bed
+```{r}
+wmin_ga2_ggir <- (pivot_wider(df %>% filter(analysis == "ggir") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (wmin)))
 
-
+ga2_md(wmin_ga2_ggir, "Wake Minutes", "GENEActiv 1 (mins)", 
+       "GENEActiv 2 (mins)", "Two GENEActivs using GGIR")
+```
 ### Wake-up Time (etime)
 #### Wake-up Time (etime)
 ##### etime = time awakened from sleep in morning
 ###### Adjusted to 2pm = 0:00 in minutes since 2pm
+```{r}
+etime_ga2_ggir <-  (pivot_wider(adjtime(df$etime) %>% filter(analysis == "ggir") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (adjtime)))
 
+ga2_md(etime_ga2_ggir, "Wake-up Time", "GENEActiv 1 (mins after 2pm)",
+       "GENEActiv 2 (mins after 2pm)", "Two GENEActivs using GGIR")
+```
 ### Sleep Time (stime)
 #### Sleep Time (stime)
 ##### stime = time fell asleep at night
 ###### Adjusted to 2pm = 0:00 in mins since 2pm
+```{r}
 
+stime_ga2_ggir <- (pivot_wider(adjtime(df$stime) %>% filter(analysis == "ggir") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = (adjtime)))
+
+ga2_md(stime_ga2_ggir, "Sleep Time", "GENEActiv 1 (mins after 2pm)",
+       "GENEActiv 2 (mins after 2pm)", "Two GENEActivs using GGIR")
+```
 ### Total Sleep Duration (dur)
 #### Total Sleep Duration (dur)
 ##### dur = time between fall asleep time and wake-up time
+```{r}
+dur_ga2_ggir <- (pivot_wider(sleepduration(1) %>% filter(analysis == "ggir") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = dur))
+
+ga2_md(dur_ga2_ggir, "Sleep Duration", "GENEActiv 1 (mins)",
+       "GENEActiv 2 (mins)", "Two GENEActivs using GGIR")
+```
 
 ### Sleep Midpoint (mid)
 #### Sleep Midpoint (mid)
 ##### mid = middle of sleep period
+```{r}
+mid_ga2_ggir <- (pivot_wider(sleepmid(1) %>% filter(analysis == "ggir") %>% 
+  filter(actigraph == "g1" | actigraph == "g2"), night, 
+  names_from = actigraph, values_from = mid))
+
+ga2_md(mid_ga2_ggir, "Sleep Midpoint", "GENEActiv 1 (mins after 2pm)",
+       "GENEActiv 2 (mins after 2pm)", "Two GENEActivs using GGIR")
+```
+
+
+
+
+
+
+
+
+
+
+## GENEActiv Markdown vs GENEActiv data {.tabset}
+
+### Time in Bed (tinb)
+#### Time in Bed (tinb)
+##### tinb = total duration of time spent in bed
+```{r}
+tinb_ga2_md_ggir <- (pivot_wider(df %>% filter(actigraph == "g1") %>% 
+  filter(wearer == "Kate"), night, names_from = analysis, values_from = (tinb)))
+
+ga_md_ggir(tinb_ga2_md_ggir, "Time Spent in Bed", "GENEActiv 1 GGIR (mins)", 
+           "GENEActiv 1 Markdown (mins)", "GENEActiv 1 GGIR vs Markdown")
+
+tinb_ga2_md_ggir2 <- (pivot_wider(df %>% filter(actigraph == "g2") %>%
+  filter(wearer == "Kate"), night, names_from = analysis, values_from = (tinb)))
+
+ga_md_ggir(tinb_ga2_md_ggir2, "Time Spent in Bed", "GENEActiv 2 GGIR (mins)", 
+           "GENEActiv 2 Markdown (mins)", "GENEActiv 2 GGIR vs Markdown")
+```
+### Percent Sleep (pslp)
+#### Percent Sleep (pslp)
+##### pslp = (Sleep Minutes / Duration in Bed) x 100
+```{r}
+pslp_ga2_md_ggir <- (pivot_wider(df %>% filter(actigraph == "g1") %>% 
+  filter(wearer == "Kate"), night, names_from = analysis, values_from = (pslp)))
+
+ga_md_ggir(pslp_ga2_md_ggir, "Percent Sleep", "GENEActiv 1 GGIR (percent)", 
+           "GENEActiv 1 Markdown (percent)", "GENEActiv 1 GGIR vs Markdown")
+
+pslp_ga2_md_ggir2 <- (pivot_wider(df %>% filter(actigraph == "g2") %>% 
+  filter(wearer == "Kate"), night, names_from = analysis, values_from = (pslp)))
+
+ga_md_ggir(pslp_ga2_md_ggir2, "Percent Sleep", "GENEActiv 2 GGIR (percent)", 
+           "GENEActiv 2 Markdown (percent)", "GENEActiv 2 GGIR vs Markdown")
+```
+### Sleep Minutes (smin)
+#### Sleep Minutes (smin)
+##### smin = minutes asleep in bed
+```{r}
+smin_ga2_md_ggir <- (pivot_wider(df %>% filter(actigraph == "g1") %>% 
+  filter(wearer == "Kate"), night, names_from = analysis, values_from = (smin)))
+
+ga_md_ggir(smin_ga2_md_ggir, "Sleep Minutes", "GENEActiv 1 GGIR (mins)", 
+           "GENEActiv 1 Markdown (mins)", "GENEActiv 1 GGIR vs Markdown")
+
+smin_ga2_md_ggir2 <- (pivot_wider(df %>% filter(actigraph == "g2") %>% 
+  filter(wearer == "Kate"), night, names_from = analysis, values_from = (smin)))
+
+ga_md_ggir(smin_ga2_md_ggir2, "Sleep Minutes", "GENEActiv 2 GGIR (mins)", 
+           "GENEActiv 2 Markdown (mins)", "GENEActiv 2 GGIR vs Markdown")
+```
+### Wake Minutes (wmin)
+#### Wake Minutes (wmin)
+##### wmin = minutes awake in bed
+```{r}
+wmin_ga2_md_ggir <- (pivot_wider(df %>% filter(actigraph == "g1") %>% 
+  filter(wearer == "Kate"), night, names_from = analysis, values_from = (wmin)))
+
+ga_md_ggir(wmin_ga2_md_ggir, "Wake Minutes", "GENEActiv 1 GGIR (mins)", 
+           "GENEActiv 1 Markdown (mins)", "GENEActiv 1 GGIR vs Markdown")
+
+wmin_ga2_md_ggir2 <- (pivot_wider(df %>% filter(actigraph == "g2") %>% 
+  filter(wearer == "Kate"), night, names_from = analysis, values_from = (wmin)))
+
+ga_md_ggir(wmin_ga2_md_ggir2, "Wake Minutes", "GENEActiv 2 GGIR (mins)", 
+           "GENEActiv 2 Markdown (mins)", "GENEActiv 2 GGIR vs Markdown")
+```
+### Wake-up Time (etime)
+#### Wake-up Time (etime)
+##### etime = time awakened from sleep in morning
+###### Adjusted to 2pm = 0:00 in minutes since 2pm
+```{r}
+etime_ga2_md_ggir <-  (pivot_wider(adjtime(df$etime) %>% 
+  filter(actigraph == "g1") %>% filter(wearer == "Kate"), 
+  night, names_from = analysis, values_from = (adjtime)))
+
+ga_md_ggir(etime_ga2_md_ggir, "Wake-up Time", 
+           "GENEActiv 1 GGIR (mins after 2pm)",
+           "GENEActiv 1 Markdown (mins after 2pm)", 
+           "GENEActiv 1 GGIR vs Markdown")
+
+etime_ga2_md_ggir2 <-  (pivot_wider(adjtime(df$etime) %>% 
+  filter(actigraph == "g2") %>% filter(wearer == "Kate"), 
+  night, names_from = analysis, values_from = (adjtime)))
+
+ga_md_ggir(etime_ga2_md_ggir2, "Wake-up Time", 
+           "GENEActiv 2 GGIR (mins after 2pm)",
+           "GENEActiv 2 Markdown (mins after 2pm)", 
+           "GENEActiv 2 GGIR vs Markdown")
+```
+### Sleep Time (stime)
+#### Sleep Time (stime)
+##### stime = time fell asleep at night
+###### Adjusted to 2pm = 0:00 in mins since 2pm
+```{r}
+stime_ga2_md_ggir <- (pivot_wider(adjtime(df$stime) %>% 
+ filter(actigraph == "g1") %>% 
+ filter(wearer == "Kate"), 
+ night, names_from = analysis, values_from = (adjtime)))
+
+ga_md_ggir(stime_ga2_md_ggir, "Sleep Time", 
+           "GENEActiv 1 GGIR (mins after 2pm)",
+           "GENEActiv 1 Markdown (mins after 2pm)", 
+           "GENEActiv 1 GGIR vs Markdown")
+
+
+stime_ga2_md_ggir2 <- (pivot_wider(adjtime(df$stime) %>% 
+ filter(actigraph == "g2") %>% 
+ filter(wearer == "Kate"), 
+ night, names_from = analysis, values_from = (adjtime)))
+
+ga_md_ggir(stime_ga2_md_ggir2, "Sleep Time", 
+           "GENEActiv 2 GGIR (mins after 2pm)",
+           "GENEActiv 2 Markdown (mins after 2pm)", 
+           "GENEActiv 2 GGIR vs Markdown")
+```
+### Total Sleep Duration (dur)
+#### Total Sleep Duration (dur)
+##### dur = time between fall asleep time and wake-up time
+```{r}
+dur_ga2_md_ggir <- (pivot_wider(sleepduration(1) %>% 
+ filter(actigraph == "g1") %>%
+ filter(wearer == "Kate"), 
+ night, names_from = analysis, values_from = dur))
+
+ga_md_ggir(dur_ga2_md_ggir, "Sleep Duration", 
+           "GENEActiv 1 GGIR (mins)",
+           "GENEActiv 1 Markdown (mins)", 
+           "GENEActiv 1 GGIR vs Markdown")
+
+dur_ga2_md_ggir2 <- (pivot_wider(sleepduration(1) %>% 
+  filter(actigraph == "g2") %>% 
+  filter(wearer == "Kate"), 
+  night, names_from = analysis, values_from = dur))
+
+ga_md_ggir(dur_ga2_md_ggir2, "Sleep Duration", 
+           "GENEActiv 2 GGIR (mins)",
+           "GENEActiv 2 Markdown (mins)", 
+           "GENEActiv 2 GGIR vs Markdown")
+```
+
+### Sleep Midpoint (mid)
+#### Sleep Midpoint (mid)
+##### mid = middle of sleep period
+```{r}
+mid_ga2_md_ggir <- (pivot_wider(sleepmid(1) %>% 
+ filter(actigraph == "g1") %>% 
+ filter(wearer == "Kate"), 
+ night, names_from = analysis, values_from = mid))
+
+ga_md_ggir(mid_ga2_md_ggir, "Sleep Midpoint", 
+           "GENEActiv 1 GGIR (mins after 2pm)",
+           "GENEActiv 1 Markdown (mins after 2pm)", 
+           "GENEActiv 1 GGIR vs Markdown")
+
+mid_ga2_md_ggir2 <- (pivot_wider(sleepmid(1) %>% 
+  filter(actigraph == "g2") %>% 
+  filter(wearer == "Kate"), 
+  night, names_from = analysis, values_from = mid))
+
+ga_md_ggir(mid_ga2_md_ggir2, "Sleep Midpoint", 
+           "GENEActiv 2 GGIR (mins after 2pm)",
+           "GENEActiv 2 Markdown (mins after 2pm)", 
+           "GENEActiv 2 GGIR vs Markdown")
+```
+
 
